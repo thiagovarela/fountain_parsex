@@ -42,11 +42,11 @@ defmodule FountainParsex.Types do
 
   defmodule Scene do
     @moduledoc """
-    Represents a scene with its heading and content tokens.
+    Represents a scene with its heading and content text.
     """
     @type t :: %__MODULE__{
             heading: Token.t() | nil,
-            content: [Token.t()]
+            content: String.t()
           }
     defstruct [:heading, :content]
   end

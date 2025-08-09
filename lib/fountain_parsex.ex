@@ -20,13 +20,7 @@ defmodule FountainParsex do
       result = FountainParsex.parse("EXT. HOUSE - DAY\\n\\nJOHN\\nHello, world!")
       # Returns a ParseResult struct with parsed tokens
   """
-  def parse(script, opts \\ []) do
-    # Reject any options to maintain backward compatibility error handling
-    if opts != [] do
-      raise ArgumentError,
-            "FountainParsex.parse/2 no longer accepts options. Tokens are always included."
-    end
-
+  def parse(script) do
     script
     |> Lexer.preprocess()
     |> Tokenizer.tokenize()
@@ -99,7 +93,7 @@ defmodule FountainParsex do
     # Start new scene with this heading
     new_scene = %Scene{
       heading: token,
-      content: []
+      content: ""
     }
 
     {new_scenes, new_scene}
@@ -115,17 +109,27 @@ defmodule FountainParsex do
   end
 
   defp add_token_to_scene(token, scenes, current_scene) do
+    token_text = get_token_text(token)
+    
     if current_scene do
-      updated_scene = %{current_scene | content: current_scene.content ++ [token]}
+      updated_content = if current_scene.content == "", do: token_text, else: current_scene.content <> "\n" <> token_text
+      updated_scene = %{current_scene | content: updated_content}
       {scenes, updated_scene}
     else
       # Tokens before first scene heading (like action) - create scene without heading
       new_scene = %Scene{
         heading: nil,
-        content: [token]
+        content: token_text
       }
 
       {scenes, new_scene}
+    end
+  end
+
+  defp get_token_text(token) do
+    case token.text do
+      nil -> ""
+      text -> text
     end
   end
 
